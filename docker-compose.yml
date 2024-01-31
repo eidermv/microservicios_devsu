@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mariadb
+    container_name: some-mariadb
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: eider205
+      MYSQL_USER: root
+      MYSQL_PASSWORD: eider205
+      MYSQL_DATABASE: prueba_devsu
+    ports:
+      - "3306:3306"
+    volumes:
+      - /d/Docker/mariadb_data:/var/lib/mysql
+  cliente:
+    image: cliente-service
+    container_name: spring-cliente-service
+#    restart: always
+    environment:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+# Si se crea por primera vez ponerle SPRING_SQL_INIT_MODE=always
+      SPRING_SQL_INIT_MODE: never
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/prueba_devsu
+#      SPRING_DATASOURCE_URL: jdbc:mariadb://my_ip:3306/prueba_devsu
+    ports:
+      - "8099:8099"
+    depends_on:
+      - db
+  cuenta:
+    image: cuenta_service
+    container_name: spring-cuenta-service
+    #    restart: always
+    environment:
+      URL_BACK_CLIENTE: http://cliente:8099/
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/prueba_devsu
+    #      SPRING_DATASOURCE_URL: jdbc:mariadb://my_ip:3306/prueba_devsu
+    ports:
+      - "8098:8098"
+    depends_on:
+      - db
+      - cliente
+#volumes:
+#  db:
